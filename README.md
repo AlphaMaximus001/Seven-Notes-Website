@@ -1,16 +1,16 @@
 # Seven Notes website
 
-Storefront for **Seven Notes**, a music instrument store in Lucknow. It lists all 540 SKUs from the store's stock sheet across seven departments, Sa to Ni:
+Storefront for **Seven Notes**, a music instrument store in Lucknow. It lists all 540 SKUs from the store's stock sheet across seven departments:
 
-| Swara | Department | Products |
-|---|---|---|
-| Sa | Guitars & Basses | 137 |
-| Re | Ukuleles, Violins & Folk | 78 |
-| Ga | Keys & MIDI | 28 |
-| Ma | Drums & Percussion | 36 |
-| Pa | Studio & Live Sound | 37 |
-| Dha | Amps & Effects | 50 |
-| Ni | Strings & Accessories | 174 |
+| Department | Products |
+|---|---|
+| Guitars & Basses | 137 |
+| Ukuleles, Violins & Folk | 78 |
+| Keys & MIDI | 28 |
+| Drums & Percussion | 36 |
+| Studio & Live Sound | 37 |
+| Amps & Effects | 50 |
+| Strings & Accessories | 174 |
 
 It's a static site with no build step and no server. Open `index.html` through any static host (GitHub Pages, Netlify, Cloudflare Pages) or run it locally:
 

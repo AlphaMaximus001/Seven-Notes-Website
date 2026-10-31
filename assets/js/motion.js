@@ -82,7 +82,7 @@
           const img = t.querySelector(".tile__img");
           if (img) gsap.fromTo(img, { yPercent: 8 }, { yPercent: -6, ease: "none", scrollTrigger: { trigger: t, scrub: true } });
         });
-        // Listing header: giant swara slides against the scroll.
+        // Listing header: giant department artwork drifts against the scroll.
         root.querySelectorAll("[data-parallax]").forEach(el => {
           gsap.to(el, { xPercent: -14, ease: "none", scrollTrigger: { trigger: el.parentElement, start: "top top", end: "bottom top", scrub: true } });
         });
