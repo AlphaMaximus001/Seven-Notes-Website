@@ -42,10 +42,10 @@
 
     /* First load: logo bars equalise, then the curtain lifts. */
     intro() {
-      const bars = document.querySelectorAll(".header .logo__bars i");
+      const mark = document.querySelector(".header .logo__mark");
       if (reduce) { gsap.set(curtainBars(), { scaleY: 0 }); return Promise.resolve(); }
       gsap.set(curtainBars(), { scaleY: 1 });
-      gsap.from(bars, { scaleY: 0.15, duration: 0.9, ease: "elastic.out(1, .45)", stagger: 0.05, delay: 0.25 });
+      gsap.from(mark, { rotate: -24, scale: 0.6, opacity: 0, transformOrigin: "30% 60%", duration: 1.1, ease: "elastic.out(1, .5)", delay: 0.3 });
       return this.reveal();
     },
 
