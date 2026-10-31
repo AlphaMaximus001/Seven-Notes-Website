@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seven Notes Music Store, Lucknow</title>
+  <meta name="description" content="Guitars, ukuleles, keyboards, drums, studio gear, strings and accessories. Browse 540 products and pick up at Seven Notes, Lucknow.">
+  <meta name="theme-color" content="#17153B">
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#app">Skip to content</a>
+
+  <div class="utility">
+    <div class="wrap utility__row">
+      <p>Every guitar set up in-store before it leaves</p>
+      <p class="hide-sm">Pickup from our Lucknow store or delivery across India</p>
+      <p class="hide-md">GST invoice for schools, studios and churches</p>
+    </div>
+  </div>
+
+  <header class="header" id="header">
+    <div class="wrap header__row">
+      <a class="logo" href="#/" aria-label="Seven Notes home">
+        <img class="logo__mark" src="assets/img/logo-mark.png" alt="" width="361" height="246">
+        <span class="logo__word">Seven Notes</span>
+      </a>
+      <form class="search" id="searchForm" role="search" autocomplete="off">
+        <label class="sr-only" for="searchInput">Search products</label>
+        <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="searchInput" type="search" placeholder="Search 540 products, brands and categories" aria-controls="suggest">
+        <kbd class="search__kbd hide-sm">/</kbd>
+        <div class="suggest" id="suggest" role="listbox" hidden></div>
+      </form>
+      <nav class="header__actions" aria-label="Your lists">
+        <a class="iconbtn" href="#/wishlist" aria-label="Wishlist">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+          <span class="badge" id="wishCount" hidden>0</span>
+        </a>
+        <button class="iconbtn" id="listBtn" aria-label="Open enquiry list">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+          <span class="badge" id="listCount" hidden>0</span>
+        </button>
+        <button class="iconbtn show-md" id="menuBtn" aria-label="Open departments menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </nav>
+    </div>
+    <nav class="depts" id="depts" aria-label="Departments">
+      <div class="wrap depts__row" id="deptsRow"></div>
+      <div class="mega" id="mega" hidden></div>
+    </nav>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <footer class="footer">
+    <div class="wrap footer__grid">
+      <div class="footer__brand">
+        <a class="logo logo--light" href="#/" aria-label="Seven Notes home"><img class="logo__full" src="assets/img/logo-full-white.png" alt="Seven Notes" width="361" height="246"></a>
+        <p id="footerAddress"></p>
+        <p><a id="footerPhone" href="#"></a></p>
+      </div>
+      <div><h3>Departments</h3><ul id="footerDepts"></ul></div>
+      <div><h3>Help</h3><ul>
+        <li><a href="#/help/enquiry">How enquiries work</a></li>
+        <li><a href="#/help/delivery">Delivery and pickup</a></li>
+        <li><a href="#/help/returns">Returns and warranty</a></li>
+        <li><a href="#/help/strings">Which strings fit my instrument?</a></li>
+      </ul></div>
+      <div class="footer__news">
+        <h3>New stock, first</h3>
+        <p>One email when new guitars and keyboards land. No spam.</p>
+        <form class="news" id="newsForm"><label class="sr-only" for="newsEmail">Email</label><input id="newsEmail" type="email" required placeholder="you@example.com"><button class="btn btn--accent" type="submit">Sign up</button></form>
+        <p class="news__ok" id="newsOk" hidden>Thanks. You're on the list.</p>
+      </div>
+    </div>
+    <div class="wrap footer__base"><p>© <span id="year"></span> Seven Notes, Lucknow</p><p>Product photos courtesy of the respective manufacturers.</p></div>
+  </footer>
+
+  <!-- Enquiry list drawer -->
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="drawer" id="drawer" aria-label="Enquiry list" aria-hidden="true" inert>
+    <div class="drawer__head">
+      <h2>Your enquiry list</h2>
+      <button class="iconbtn" id="drawerClose" aria-label="Close enquiry list"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="drawer__body" id="drawerBody"></div>
+    <div class="drawer__foot" id="drawerFoot"></div>
+  </aside>
+
+  <!-- Mobile department menu -->
+  <aside class="mnav" id="mnav" aria-label="Departments" aria-hidden="true" inert></aside>
+
+  <!-- Route transition: seven bars -->
+  <div class="curtain" id="curtain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script src="assets/vendor/ScrollTrigger.min.js"></script>
+  <script src="assets/vendor/Flip.min.js"></script>
+  <script src="assets/vendor/SplitText.min.js"></script>
+  <script src="assets/vendor/lenis.min.js"></script>
+  <script src="assets/data/catalog.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/art.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/strings.js"></script>
+  <script src="assets/js/motion.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
