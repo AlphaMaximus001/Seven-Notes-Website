@@ -3,50 +3,43 @@
   {
    "id": "guitars",
    "name": "Guitars & Basses",
-   "swara": "Sa",
-   "note": "C",
+   "icon": "acoustic",
    "blurb": "Acoustic, electro-acoustic, classical, electric and bass guitars."
   },
   {
    "id": "folk",
    "name": "Ukuleles, Violins & Folk",
-   "swara": "Re",
-   "note": "D",
+   "icon": "ukulele",
    "blurb": "Ukuleles, violins, mandolins, harmonicas and recorders."
   },
   {
    "id": "keys",
    "name": "Keys & MIDI",
-   "swara": "Ga",
-   "note": "E",
+   "icon": "keyboard",
    "blurb": "Portable keyboards, MIDI controllers and keyboard gear."
   },
   {
    "id": "drums",
    "name": "Drums & Percussion",
-   "swara": "Ma",
-   "note": "F",
+   "icon": "djembe",
    "blurb": "Cajons, djembes, tongue drums, pads, sticks and shakers."
   },
   {
    "id": "studio",
    "name": "Studio & Live Sound",
-   "swara": "Pa",
-   "note": "G",
+   "icon": "mic",
    "blurb": "Microphones, interfaces, headphones, monitors and mixers."
   },
   {
    "id": "amps",
    "name": "Amps & Effects",
-   "swara": "Dha",
-   "note": "A",
+   "icon": "amp",
    "blurb": "Guitar amps, pedals, multi-effects and power supplies."
   },
   {
    "id": "accessories",
    "name": "Strings & Accessories",
-   "swara": "Ni",
-   "note": "B",
+   "icon": "strings",
    "blurb": "Strings, cables, stands, capos, straps, cases and care."
   }
  ],

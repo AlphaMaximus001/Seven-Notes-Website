@@ -60,11 +60,11 @@
 
   /* ---------- Header: departments + mega menu + mobile nav ---------- */
   function buildHeader() {
-    $("#deptsRow").innerHTML = DEPTS.map(d => `<a class="depts__link" href="#/c/${d.id}" data-dept="${d.id}" aria-haspopup="true" aria-expanded="false"><small>${d.swara}</small>${esc(d.name)}</a>`).join("") +
-      '<a class="depts__link" href="#/c/all"><small>All</small>Every product</a>';
+    $("#deptsRow").innerHTML = DEPTS.map(d => `<a class="depts__link" href="#/c/${d.id}" data-dept="${d.id}" aria-haspopup="true" aria-expanded="false">${esc(d.name)}</a>`).join("") +
+      '<a class="depts__link" href="#/c/all">Every product</a>';
     $("#footerDepts").innerHTML = DEPTS.map(d => `<li><a href="#/c/${d.id}">${esc(d.name)}</a></li>`).join("");
     $("#mnav").innerHTML = `<div class="drawer__head" style="padding:0 0 12px;border-color:rgba(255,255,255,.15)"><span class="logo logo--light"><span class="logo__word">Departments</span></span><button class="iconbtn" data-close-mnav aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>` +
-      DEPTS.map(d => `<a href="#/c/${d.id}"><small>${d.swara}</small>${esc(d.name)}</a>`).join("") + '<a href="#/c/all"><small>All</small>Every product</a><a href="#/wishlist"><small>♥</small>Wishlist</a>';
+      DEPTS.map(d => `<a href="#/c/${d.id}">${esc(d.name)}</a>`).join("") + '<a href="#/c/all">Every product</a><a href="#/wishlist">Wishlist</a>';
     $("#footerAddress").textContent = S.address;
     const ph = $("#footerPhone"); ph.textContent = S.phoneDisplay; ph.href = "tel:" + S.phoneDisplay.replace(/\s/g, "");
     $("#year").textContent = new Date().getFullYear();
@@ -73,7 +73,7 @@
     function megaHTML(d) {
       const cats = catsOf(d.id), list = byDept(d.id), feat = list.filter(hasImg).sort((a, b) => b.stock - a.stock)[0];
       return `<div class="wrap mega__grid">
-        <div class="mega__intro"><div class="swara display">${d.swara}</div><h3>${esc(d.name)}</h3><p>${esc(d.blurb)}</p>
+        <div class="mega__intro"><svg class="mega__icon" viewBox="0 0 64 64" aria-hidden="true">${window.ART[d.icon]}</svg><h3>${esc(d.name)}</h3><p>${esc(d.blurb)}</p>
           <div class="mega__brands">${brandCounts(list).filter(([b]) => b !== "Generic").slice(0, 6).map(([b]) => `<a class="chip" href="#/c/${d.id}?brand=${encodeURIComponent(b)}">${esc(b)}</a>`).join("")}</div></div>
         <div class="mega__cats">${cats.map(([c, n]) => `<a href="#/c/${d.id}?cat=${encodeURIComponent(c)}">${esc(c)}<span>${n}</span></a>`).join("")}<a href="#/c/${d.id}"><b>All ${esc(d.name.toLowerCase())}</b><span>${list.length}</span></a></div>
         ${feat ? `<a class="mega__feature" href="#/p/${feat.id}"><img src="${feat.images[0]}" alt=""><p>${esc(feat.brand)}</p><strong>${esc(feat.name)}</strong></a>` : ""}
@@ -199,7 +199,7 @@
     <section class="hero" aria-labelledby="heroTitle">
       <div class="wrap hero__grid">
         <div class="hero__copy">
-          <h1 id="heroTitle" class="display"><span class="ln"><span>Sa to Ni,</span></span><span class="ln"><span>under one</span></span><span class="ln"><span>roof.</span></span></h1>
+          <h1 id="heroTitle" class="display"><span class="ln"><span>Every note,</span></span><span class="ln"><span>under one</span></span><span class="ln"><span>roof.</span></span></h1>
           <p class="hero__lede">Guitars, ukuleles, keys, drums, studio gear and every string, cable and capo in between. Browse ${C.products.length} products, then pick them up at our ${esc(S.city)} store or have them delivered.</p>
           <div class="hero__cta"><a class="btn btn--accent" href="#/c/guitars">Shop guitars</a><a class="btn btn--ghost" href="#/c/all?stock=1">See what's in stock</a></div>
           <p class="hero__note"><button class="sound" id="soundBtn" aria-pressed="${HeroStrings.isOn()}"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><span>${HeroStrings.isOn() ? "Sound on" : "Turn sound on"}</span></button> Then sweep across the strings.</p>
@@ -210,10 +210,10 @@
 
     <section class="section">
       <div class="wrap">
-        <div class="shead"><div><h2 data-split>Seven departments, one for every note.</h2><p>From Sa to Ni: pick where you want to start.</p></div><a class="shead__link" href="#/c/all">Browse all ${C.products.length}</a></div>
+        <div class="shead"><div><h2 data-split>Seven departments, one for every note.</h2><p>Pick where you want to start.</p></div><a class="shead__link" href="#/c/all">Browse all ${C.products.length}</a></div>
         <div class="bento">${DEPTS.map(d => { const p = tileImg[d.id]; return `
           <a class="tile" href="#/c/${d.id}">
-            <div><span class="tile__swara">${d.swara}</span><h3>${esc(d.name)}</h3><span class="tile__count">${counts[d.id]} products in ${catsOf(d.id).length} categories</span></div>
+            <div><h3>${esc(d.name)}</h3><span class="tile__count">${counts[d.id]} products in ${catsOf(d.id).length} categories</span></div>
             <span class="tile__go" aria-hidden="true">${ICON.arrow}</span>
             ${p && hasImg(p) ? `<img class="tile__img" src="${p.images[0]}" alt="" loading="lazy">` : ""}
           </a>`; }).join("")}</div>
@@ -345,12 +345,11 @@
     const dept = kind === "c" ? D[key] : null;
     const title = dept ? dept.name : kind === "brand" ? key : kind === "search" ? `Results for “${f.q}”` : "Every product";
     const desc = dept ? dept.blurb : kind === "brand" ? `Everything we stock from ${key}.` : kind === "search" ? "" : `All ${C.products.length} products across seven departments.`;
-    const swara = dept ? dept.swara : kind === "brand" ? key.slice(0, 2) : "♪";
     const cats = dept ? catsOf(dept.id) : null;
     app.innerHTML = `
       <section class="lhead"><div class="wrap">
         ${crumbs([["Home", "#/"], ...(dept ? [[dept.name, null]] : kind === "brand" ? [["Brands", "#/c/all"], [key, null]] : [[kind === "search" ? "Search" : "All products", null]])])}
-        <span class="lhead__swara" aria-hidden="true" data-parallax>${esc(swara)}</span>
+        ${dept ? `<svg class="lhead__art" viewBox="0 0 64 64" aria-hidden="true" data-parallax>${window.ART[dept.icon]}</svg>` : ""}
         <h1 data-split>${esc(title)}</h1>${desc ? `<p>${esc(desc)}</p>` : ""}
         ${cats ? `<div class="lchips" id="catChips">${cats.map(([c, n]) => `<button class="chip" data-chip="${esc(c)}" aria-pressed="${f.cat.includes(c)}">${esc(c)} <span>${n}</span></button>`).join("")}</div>` : ""}
       </div></section>

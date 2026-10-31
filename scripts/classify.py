@@ -5,14 +5,14 @@ Usage: python3 scripts/classify.py sku.csv > scripts/products.raw.json
 import csv, json, re, sys
 
 DEPARTMENTS = [
-    # id, name, swara, note letter, blurb
-    ("guitars", "Guitars & Basses", "Sa", "C", "Acoustic, electro-acoustic, classical, electric and bass guitars."),
-    ("folk", "Ukuleles, Violins & Folk", "Re", "D", "Ukuleles, violins, mandolins, harmonicas and recorders."),
-    ("keys", "Keys & MIDI", "Ga", "E", "Portable keyboards, MIDI controllers and keyboard gear."),
-    ("drums", "Drums & Percussion", "Ma", "F", "Cajons, djembes, tongue drums, pads, sticks and shakers."),
-    ("studio", "Studio & Live Sound", "Pa", "G", "Microphones, interfaces, headphones, monitors and mixers."),
-    ("amps", "Amps & Effects", "Dha", "A", "Guitar amps, pedals, multi-effects and power supplies."),
-    ("accessories", "Strings & Accessories", "Ni", "B", "Strings, cables, stands, capos, straps, cases and care."),
+    # id, name, icon (artwork key in assets/js/art.js), blurb
+    ("guitars", "Guitars & Basses", "acoustic", "Acoustic, electro-acoustic, classical, electric and bass guitars."),
+    ("folk", "Ukuleles, Violins & Folk", "ukulele", "Ukuleles, violins, mandolins, harmonicas and recorders."),
+    ("keys", "Keys & MIDI", "keyboard", "Portable keyboards, MIDI controllers and keyboard gear."),
+    ("drums", "Drums & Percussion", "djembe", "Cajons, djembes, tongue drums, pads, sticks and shakers."),
+    ("studio", "Studio & Live Sound", "mic", "Microphones, interfaces, headphones, monitors and mixers."),
+    ("amps", "Amps & Effects", "amp", "Guitar amps, pedals, multi-effects and power supplies."),
+    ("accessories", "Strings & Accessories", "strings", "Strings, cables, stands, capos, straps, cases and care."),
 ]
 
 BRANDS = ["D'Addario", "Ernie Ball", "DR", "Olympia", "Elixir", "Martin", "Kadence", "Mahalo", "Hohner", "Granada",
@@ -207,7 +207,7 @@ def main(path):
         seen.add(slug)
         out.append({"id": slug, "sheetName": raw.strip(), "name": name, "brand": brand_of(lower),
                     "department": dep, "category": cat, "colour": colour_of(name), "stock": max(qty, 0)})
-    json.dump({"departments": [dict(zip(["id", "name", "swara", "note", "blurb"], d)) for d in DEPARTMENTS],
+    json.dump({"departments": [dict(zip(["id", "name", "icon", "blurb"], d)) for d in DEPARTMENTS],
                "products": out}, sys.stdout, indent=1, ensure_ascii=False)
 
 

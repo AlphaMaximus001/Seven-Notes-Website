@@ -1,7 +1,7 @@
 /* Seven playable strings. Sweep the pointer across them to pluck; each string is one department.
    Sound is synthesised with Karplus-Strong (no audio files) and only plays after the visitor turns it on. */
 (function () {
-  const NOTES = [130.81, 146.83, 164.81, 174.61, 196.0, 220.0, 246.94]; // Sa Re Ga Ma Pa Dha Ni (C3 major)
+  const NOTES = [130.81, 146.83, 164.81, 174.61, 196.0, 220.0, 246.94]; // C3 major scale, one note per department
   let ctx = null, buffers = [], soundOn = false;
 
   function makeBuffer(freq) {
@@ -44,13 +44,13 @@
     const strs = depts.map((d, i) => {
       const glow = document.createElementNS(svgNS, "path"); glow.setAttribute("class", "s-glow");
       const line = document.createElementNS(svgNS, "path"); line.setAttribute("class", "s-line");
-      const w = 4.2 - i * 0.45; // thick (low Sa) to thin (high Ni)
+      const w = 4.2 - i * 0.45; // thick (lowest note) to thin (highest)
       line.setAttribute("stroke-width", w); glow.setAttribute("stroke-width", w * 3);
       line.setAttribute("stroke", i < 4 ? "url(#wound)" : "url(#plain)");
       svg.append(glow, line);
       const a = document.createElement("a");
       a.className = "slabel"; a.href = "#/c/" + d.id;
-      a.innerHTML = `<b>${d.swara}</b><span>${d.name}</span><em>${counts[d.id]} products</em>`;
+      a.innerHTML = `<b><svg viewBox="0 0 64 64" aria-hidden="true">${window.ART[d.icon]}</svg></b><span>${d.name}</span><em>${counts[d.id]} products</em>`;
       a.addEventListener("pointerenter", () => pluck(i, 0.22, 0.6));
       a.addEventListener("focus", () => pluck(i, 0.22, 0.5));
       labels.append(a);
