@@ -2,8 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": "public",
   "functions": {
-    "api/[...path].js": { "includeFiles": "server/**", "maxDuration": 15 }
+    "api/index.js": { "includeFiles": "server/**", "maxDuration": 15 }
   },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index.js?__p=:path*" }
+  ],
   "headers": [
     { "source": "/admin/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }, { "key": "X-Frame-Options", "value": "DENY" }] }
   ]

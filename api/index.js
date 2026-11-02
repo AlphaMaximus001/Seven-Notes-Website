@@ -1,4 +1,4 @@
-// Single serverless entry point for /api/* (keeps the project inside Vercel Hobby's function limit).
+// Single serverless entry point: vercel.json rewrites every /api/* request here (req.url keeps the original path).
 import { ensureSchema, hasDb } from "../server/db.js";
 import { send, fail, readJson, readRaw, checkPassword, sessionCookie, clearCookie, isAdmin, requireAdmin, throttle, HttpError } from "../server/http.js";
 import * as shop from "../server/shop.js";
@@ -50,7 +50,10 @@ A("PUT", "/admin/settings", async req => shop.saveSettings(await readJson(req)))
 
 export default async function handler(req, res) {
   const url = new URL(req.url, "http://x");
-  const path = url.pathname.replace(/^\/api/, "").replace(/\/$/, "") || "/";
+  // On Vercel the rewrite passes the original path as __p; locally the path is used as-is.
+  const fromRewrite = url.searchParams.get("__p");
+  url.searchParams.delete("__p");
+  const path = (fromRewrite !== null ? "/" + fromRewrite : url.pathname.replace(/^\/api/, "")).replace(/\/$/, "") || "/";
   try {
     const match = routes.map(r => ({ r, m: r.method === req.method && r.re.exec(path) })).find(x => x.m);
     if (!match) {
