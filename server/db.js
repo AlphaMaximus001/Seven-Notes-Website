@@ -83,16 +83,19 @@ async function seed() {
   // Variation families: products listed as colour/size variants of each other share one family key.
   const fam = {};
   raw.products.forEach(p => { if (p.variants.length) fam[p.id] = [p.id, ...p.variants].sort()[0]; });
+  // One round trip for the whole catalogue: the function and database may be continents apart.
+  const rows = raw.products.map(p => ({
+    id: p.id, sku: p.id.toUpperCase(), name: p.name, brand: p.brand, dept: p.dept, cat: p.cat, colour: p.colour, family: fam[p.id] || null,
+    stock: p.stock, price: p.price, images: p.images.map(i => (i.startsWith("/") || i.startsWith("http") ? i : "/" + i)), specs: p.specs || {}, description: p.desc, art: p.art
+  }));
   const client = await db().connect();
   try {
     await client.query("begin");
-    for (const p of raw.products) {
-      await client.query(
-        `insert into products (id, sku, name, brand, dept, cat, colour, family, stock, price, images, specs, description, art)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) on conflict (id) do nothing`,
-        [p.id, p.id.toUpperCase(), p.name, p.brand, p.dept, p.cat, p.colour, fam[p.id] || null, p.stock, p.price,
-         JSON.stringify(p.images.map(i => (i.startsWith("/") || i.startsWith("http") ? i : "/" + i))), JSON.stringify(p.specs || {}), p.desc, p.art]);
-    }
+    await client.query(
+      `insert into products (id, sku, name, brand, dept, cat, colour, family, stock, price, images, specs, description, art)
+       select id, sku, name, coalesce(brand, ''), dept, cat, colour, family, coalesce(stock, 0), price, coalesce(images, '[]'), coalesce(specs, '{}'), coalesce(description, ''), art
+       from jsonb_to_recordset($1::jsonb) as r(id text, sku text, name text, brand text, dept text, cat text, colour text, family text, stock int, price numeric, images jsonb, specs jsonb, description text, art text)
+       on conflict (id) do nothing`, [JSON.stringify(rows)]);
     await client.query("insert into settings (key, value) values ('departments', $1) on conflict do nothing", [JSON.stringify(raw.departments)]);
     await client.query("commit");
   } catch (e) { await client.query("rollback"); throw e; } finally { client.release(); }
