@@ -7,8 +7,8 @@ import { fail } from "./http.js";
 export const DEFAULT_SETTINGS = {
   storeName: "Seven Notes", city: "Lucknow", state: "Uttar Pradesh",
   address: "Seven Notes Music Store, Lucknow, Uttar Pradesh",
-  phone: "", whatsapp: "", email: "", mapsUrl: "", gstin: "",
-  hours: [["Mon to Sat", "11:00 to 20:30"], ["Sunday", "12:00 to 19:00"]],
+  phone: "+91 96501 01386", whatsapp: "919650101386", email: "", mapsUrl: "", gstin: "",
+  hours: [["Wednesday to Monday", "11:30 am to 8:30 pm"], ["Tuesday", "Closed"]],
   shippingFee: 0, freeShippingOver: 0,
   codEnabled: true, upiEnabled: true, upiId: "", pickupEnabled: true
 };
