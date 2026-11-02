@@ -6,15 +6,35 @@ const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
 export const hasDb = Boolean(url);
 
 let pool;
+function makePool() {
+  const local = /localhost|127\.0\.0\.1|host=\//.test(url);
+  const p = new pg.Pool({
+    connectionString: url, max: 3, ssl: local ? false : { rejectUnauthorized: false },
+    idleTimeoutMillis: 5_000, connectionTimeoutMillis: 8_000, query_timeout: 12_000, keepAlive: true
+  });
+  p.on("error", () => {}); // a dropped idle connection must not crash the function
+  return p;
+}
 export function db() {
   if (!hasDb) throw Object.assign(new Error("Database not configured. Connect a Postgres database (Vercel Storage, Neon) and redeploy."), { status: 503 });
   if (!pool) {
-    const local = /localhost|127\.0\.0\.1|host=\//.test(url);
-    pool = new pg.Pool({ connectionString: url, max: 3, idleTimeoutMillis: 10_000, ssl: local ? false : { rejectUnauthorized: false } });
+    pool = makePool();
+    // On Vercel, release idle connections before the function is suspended, so a woken
+    // function never reuses a connection the database has already closed.
+    if (process.env.VERCEL) import("@vercel/functions").then(m => m.attachDatabasePool && m.attachDatabasePool(pool)).catch(() => {});
   }
   return pool;
 }
-export const q = (text, params) => db().query(text, params);
+const RETRY = /timeout|terminated|ECONNRESET|EPIPE|Connection ended|closed/i;
+/** Query with one automatic retry on a fresh pool if the connection died. */
+export async function q(text, params) {
+  try { return await db().query(text, params); }
+  catch (e) {
+    if (!RETRY.test(String(e && (e.message || e.code)))) throw e;
+    const old = pool; pool = null; old && old.end().catch(() => {});
+    return db().query(text, params);
+  }
+}
 
 const SCHEMA = `
 create table if not exists products (
