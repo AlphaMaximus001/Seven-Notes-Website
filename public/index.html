@@ -42,7 +42,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
           <span class="badge" id="wishCount" hidden>0</span>
         </a>
-        <button class="iconbtn" id="listBtn" aria-label="Open enquiry list">
+        <button class="iconbtn" id="listBtn" aria-label="Open cart">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
           <span class="badge" id="listCount" hidden>0</span>
         </button>
@@ -68,7 +68,8 @@
       </div>
       <div><h3>Departments</h3><ul id="footerDepts"></ul></div>
       <div><h3>Help</h3><ul>
-        <li><a href="#/help/enquiry">How enquiries work</a></li>
+        <li><a href="#/track">Track your order</a></li>
+        <li><a href="#/help/enquiry">How ordering works</a></li>
         <li><a href="#/help/delivery">Delivery and pickup</a></li>
         <li><a href="#/help/returns">Returns and warranty</a></li>
         <li><a href="#/help/strings">Which strings fit my instrument?</a></li>
@@ -85,10 +86,10 @@
 
   <!-- Enquiry list drawer -->
   <div class="scrim" id="scrim" hidden></div>
-  <aside class="drawer" id="drawer" aria-label="Enquiry list" aria-hidden="true" inert>
+  <aside class="drawer" id="drawer" aria-label="Cart" aria-hidden="true" inert>
     <div class="drawer__head">
-      <h2>Your enquiry list</h2>
-      <button class="iconbtn" id="drawerClose" aria-label="Close enquiry list"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <h2>Your cart</h2>
+      <button class="iconbtn" id="drawerClose" aria-label="Close cart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
     <div class="drawer__body" id="drawerBody"></div>
     <div class="drawer__foot" id="drawerFoot"></div>

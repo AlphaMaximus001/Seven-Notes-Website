@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Seller Hub | Seven Notes</title>
+  <link rel="icon" href="/assets/img/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <div id="login" class="login" hidden></div>
+
+  <div id="shell" hidden>
+    <header class="top">
+      <button class="top__menu" id="menuBtn" aria-label="Open menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <a class="top__brand" href="#/"><img src="/assets/img/logo-mark-white.png" alt="" width="361" height="246"><span>Seven Notes <b>Seller Hub</b></span></a>
+      <form class="top__search" id="topSearch" role="search">
+        <label class="sr-only" for="topQ">Search products or orders</label>
+        <input id="topQ" type="search" placeholder="Search products, SKUs or order numbers">
+        <button aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+      </form>
+      <nav class="top__right">
+        <a class="top__link" href="/" target="_blank" rel="noopener">View store</a>
+        <a class="top__bell" href="#/orders?status=pending" aria-label="Orders waiting for you"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span id="bell" hidden>0</span></a>
+        <button class="top__link" id="signOut">Sign out</button>
+      </nav>
+    </header>
+    <nav class="bookmarks" aria-label="Shortcuts">
+      <a href="#/" data-nav="home">Home</a>
+      <a href="#/orders" data-nav="orders">Orders <span class="count" id="navPending" hidden></span></a>
+      <a href="#/inventory" data-nav="inventory">Inventory</a>
+      <a href="#/inventory/new" data-nav="new">Add a product</a>
+      <a href="#/inventory?missing=price" data-nav="pricing">Pricing</a>
+      <a href="#/upload" data-nav="upload">Bulk upload</a>
+      <a href="#/customers" data-nav="customers">Customers</a>
+      <a href="#/reports" data-nav="reports">Reports</a>
+      <a href="#/settings" data-nav="settings">Settings</a>
+    </nav>
+    <aside class="side" id="side" aria-label="Menu" hidden>
+      <div class="side__head"><b>Menu</b><button id="sideClose" aria-label="Close menu"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="side__group"><h3>Catalog</h3><a href="#/inventory/new">Add a product</a><a href="#/upload">Add products via upload</a></div>
+      <div class="side__group"><h3>Inventory</h3><a href="#/inventory">Manage all inventory</a><a href="#/inventory?stock=out">Out of stock</a><a href="#/inventory?stock=low">Low stock</a><a href="#/inventory?missing=images">Listings without photos</a></div>
+      <div class="side__group"><h3>Pricing</h3><a href="#/inventory?missing=price">Listings without a price</a><a href="#/inventory?sort=price-desc">All prices</a></div>
+      <div class="side__group"><h3>Orders</h3><a href="#/orders?status=pending">Waiting for acceptance</a><a href="#/orders?status=unshipped">Unshipped</a><a href="#/orders">Manage all orders</a></div>
+      <div class="side__group"><h3>Customers</h3><a href="#/customers">All customers</a></div>
+      <div class="side__group"><h3>Reports</h3><a href="#/reports">Sales dashboard</a></div>
+      <div class="side__group"><h3>Settings</h3><a href="#/settings">Store and checkout</a></div>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+    <main id="view" class="view" tabindex="-1"></main>
+  </div>
+
+  <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal__box" id="modalBox"></div></div>
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+  <div id="print" class="print"></div>
+
+  <script src="/assets/js/art.js"></script>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, os.path.dirn
 from image_hints import HINTS
 from query import cat
 from PIL import Image
-REPO=os.path.dirname(os.path.dirname(HERE)); OUT=REPO+'/assets/img/products'; os.makedirs(OUT,exist_ok=True)
+REPO=os.path.dirname(os.path.dirname(HERE)); OUT=REPO+'/public/assets/img/products'; os.makedirs(OUT,exist_ok=True)
 raw=json.load(open(sys.argv[1])); prods=raw['products']
 COL={'Black':['black','blk','bk'],'Natural':['natural','nat','na'],'Sunburst':['sunburst','sb','sun'],'Brown':['brown','brn'],'Blue':['blue','blu','bl'],'Red':['red','rd'],'Pink':['pink','pk'],'White':['white','wh'],'Mahogany':['mahogany','mah']}
 def pick(x):

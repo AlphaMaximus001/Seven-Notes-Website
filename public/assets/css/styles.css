@@ -43,7 +43,7 @@ body {
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
-button, input, select { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 h1, h2, h3, h4 { margin: 0; line-height: 1.05; font-weight: 800; }
 p { margin: 0; }
@@ -513,3 +513,90 @@ ul { margin: 0; padding: 0; list-style: none; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
   .js [data-reveal] { opacity: 1; }
 }
+
+/* ---------- Prices ---------- */
+.card__price.is-priced { color: var(--ink); font-weight: 750; font-size: 15px; font-variation-settings: "wdth" 95; }
+.card__price s { color: var(--ink-3); font-weight: 500; font-size: 12.5px; margin-left: 4px; }
+.pinfo__mrp { font-size: 14px; color: var(--ink-3); margin-left: 8px; }
+.pinfo__mrp b { color: var(--leaf); }
+.line__price { font-weight: 700; font-size: 14px; margin: 2px 0; }
+.cart-sub { display: flex; justify-content: space-between; align-items: baseline; font-size: 17px; }
+.cart-sub b { font-size: 20px; font-variation-settings: "wdth" 110; }
+
+/* ---------- Checkout ---------- */
+.checkout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: clamp(24px, 4vw, 56px); padding-top: 32px; padding-bottom: 90px; align-items: start; }
+.checkout fieldset { border: 0; padding: 0; margin: 0 0 30px; }
+.checkout legend { font-size: 22px; font-weight: 800; font-variation-settings: "wdth" 112; margin-bottom: 14px; padding: 0; }
+.checkout .field { display: grid; gap: 6px; }
+.checkout .field label { font-size: 13.5px; font-weight: 650; }
+.checkout .field input, .checkout .field textarea { height: 48px; border: 1.5px solid var(--line); border-radius: 10px; padding: 0 14px; font-size: 16px; background: #fff; }
+.checkout .field textarea { height: 84px; padding: 12px 14px; resize: vertical; }
+.checkout .field input:focus, .checkout .field textarea:focus { outline: none; border-color: var(--neel); box-shadow: 0 0 0 4px var(--neel-l); }
+.cfields { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+.cfields > .field { grid-column: span 2; }
+.cfields > .field:nth-child(1), .cfields > .field:nth-child(2) { grid-column: span 3; }
+.cfields > .cfields__wide { grid-column: 1 / -1; }
+.opts { display: grid; gap: 10px; }
+.opt { display: flex; gap: 14px; align-items: flex-start; padding: 16px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; transition: border-color var(--t-quick), background var(--t-quick); }
+.opt:hover { border-color: var(--ink-3); }
+.opt:has(input:checked) { border-color: var(--ink); background: var(--mist); }
+.opt input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--ink); flex-shrink: 0; }
+.opt b { display: block; font-size: 16px; }
+.opt small { display: block; color: var(--ink-2); font-size: 14px; margin-top: 2px; }
+.summary { position: sticky; top: calc(var(--header-h) + 16px); background: var(--mist); border-radius: var(--r-l); padding: 24px; display: grid; gap: 14px; }
+.summary h2 { font-size: 22px; font-variation-settings: "wdth" 112; }
+.summary ul { display: grid; gap: 12px; }
+.summary li { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; font-size: 14.5px; }
+.summary__img { position: relative; width: 56px; height: 56px; border-radius: 10px; background: #fff; display: block; }
+.summary__img img { width: 100%; height: 100%; object-fit: contain; padding: 4px; mix-blend-mode: multiply; }
+.summary__img .art svg { width: 60%; height: 60%; }
+.summary__img i { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; border-radius: 10px; background: var(--ink); color: #fff; font-style: normal; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; padding: 0 5px; }
+.summary dl { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin: 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.summary dd { margin: 0; text-align: right; font-weight: 650; }
+.summary__total { font-size: 19px; font-weight: 850 !important; font-variation-settings: "wdth" 110; }
+.summary__note { font-size: 13.5px; color: var(--ink-2); }
+.summary__err { color: var(--sindoor); font-weight: 650; }
+.summary__err:empty { display: none; }
+
+/* ---------- Order placed + tracking ---------- */
+.placed { padding: clamp(40px, 7vw, 90px) 0 90px; }
+.placed h1 { font-size: clamp(36px, 5.5vw, 76px); font-variation-settings: "wdth" 122; letter-spacing: -.03em; max-width: 16ch; }
+.placed__bars { display: flex; align-items: flex-end; gap: 6px; height: 56px; margin-bottom: 24px; }
+.placed__bars i { width: 10px; border-radius: 5px; background: var(--ink); }
+.placed__bars i:nth-child(1) { height: 30%; } .placed__bars i:nth-child(2) { height: 42%; } .placed__bars i:nth-child(3) { height: 54%; } .placed__bars i:nth-child(4) { height: 66%; }
+.placed__bars i:nth-child(5) { height: 78%; } .placed__bars i:nth-child(6) { height: 90%; } .placed__bars i:nth-child(7) { height: 100%; background: var(--genda); }
+.placed__num { font-size: 20px; margin: 18px 0 8px; } .placed__num b { font-variation-settings: "wdth" 110; }
+.placed > .wrap > p { color: var(--ink-2); max-width: 56ch; }
+.placed__actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 36px; }
+.placed__card { background: var(--mist); border-radius: var(--r-l); padding: clamp(18px, 3vw, 32px); max-width: 760px; }
+.placed__card h2 { font-size: 22px; font-variation-settings: "wdth" 112; margin-bottom: 18px; }
+.placed__card h3 { font-size: 16px; margin: 22px 0 10px; }
+.track { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; margin: 0 0 22px; padding: 0; list-style: none; }
+.track li { position: relative; display: grid; justify-items: center; gap: 8px; text-align: center; font-size: 13px; color: var(--ink-3); font-weight: 600; }
+.track li::before { content: ""; position: absolute; top: 9px; left: -50%; right: 50%; height: 3px; background: var(--line); }
+.track li:first-child::before { display: none; }
+.track li.is-done::before { background: var(--leaf); }
+.track i { position: relative; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--line); }
+.track li.is-done i { border-color: var(--leaf); background: var(--leaf); }
+.track li.is-now i { box-shadow: 0 0 0 6px var(--leaf-l); }
+.track li.is-done span { color: var(--ink); }
+.track__stop { padding: 14px; border-radius: 10px; background: var(--sindoor-l); color: var(--sindoor); font-weight: 650; margin-bottom: 18px; }
+.track__ship { margin-bottom: 16px; }
+.track__ship a { color: var(--neel); font-weight: 700; }
+.track__items { display: grid; gap: 10px; }
+.track__items li { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; }
+.track__items img { width: 48px; height: 48px; object-fit: contain; background: #fff; border-radius: 8px; padding: 3px; mix-blend-mode: multiply; }
+.track__total { text-align: right; margin-top: 12px; font-size: 17px; }
+.track__log { display: grid; gap: 10px; }
+.track__log li { display: flex; justify-content: space-between; gap: 12px; font-size: 14.5px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.track__log time { color: var(--ink-3); white-space: nowrap; }
+.trackpage { padding-top: 28px; padding-bottom: 90px; display: grid; gap: 28px; }
+.trackform { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+.trackform .field { display: grid; gap: 6px; }
+.trackform .field label { font-size: 13.5px; font-weight: 650; }
+.trackform input { height: 48px; border: 1.5px solid var(--line); border-radius: 10px; padding: 0 14px; font-size: 16px; min-width: 220px; }
+.trackform input:focus { outline: none; border-color: var(--neel); box-shadow: 0 0 0 4px var(--neel-l); }
+@media (max-width: 900px) { .checkout { grid-template-columns: 1fr; } .summary { position: static; } }
+@media (max-width: 560px) { .cfields > .field, .cfields > .field:nth-child(1), .cfields > .field:nth-child(2) { grid-column: 1 / -1; } .track li span { font-size: 11px; } .trackform input { min-width: 0; width: 100%; } .trackform .field, .trackform .btn { flex: 1 1 100%; } }
+
+.summary__img .art__brand, .summary__img .art__cap, .line__img .art__brand { display: none; }

@@ -1,7 +1,25 @@
 /* Seven Notes storefront: data, router and views. Hash routes keep it hostable on any static host. */
-(function () {
+(async function () {
   "use strict";
   const C = window.CATALOG, S = window.SITE;
+  /* Live catalogue, prices and store settings from the Seller Hub; falls back to the bundled catalogue. */
+  let ONLINE = false;
+  try {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 6000);
+    const r = await fetch("/api/catalog", { signal: ctl.signal }); clearTimeout(t);
+    if (r.ok) {
+      const d = await r.json();
+      if (d.products && d.products.length) {
+        C.products = d.products; if (d.departments && d.departments.length) C.departments = d.departments;
+        const s = d.settings || {};
+        ["address", "city", "email", "mapsUrl", "whatsapp", "upiId", "state"].forEach(k => { if (s[k]) S[k] = s[k]; });
+        if (s.phone) S.phoneDisplay = s.phone;
+        if (Array.isArray(s.hours) && s.hours.length) S.hours = s.hours;
+        S.checkout = { shippingFee: s.shippingFee || 0, freeShippingOver: s.freeShippingOver || 0, cod: s.codEnabled !== false, upi: s.upiEnabled !== false, pickup: s.pickupEnabled !== false };
+        ONLINE = true;
+      }
+    }
+  } catch (e) {}
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const app = $("#app");
@@ -23,7 +41,10 @@
     if (p.stock > 0) return { cls: "low", label: `Only ${p.stock} left` };
     return { cls: "order", label: "Available to order" };
   }
-  const priceLabel = p => (S.showPrices && p.price ? "₹" + Number(p.price).toLocaleString("en-IN") : "Price on request");
+  const rupees = v => "₹" + Number(v).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  const priced = p => p.price !== null && p.price !== undefined && p.price !== "";
+  const priceLabel = p => (priced(p) ? rupees(p.price) : "Price on request");
+  const offPct = p => (priced(p) && p.mrp > p.price ? Math.round((1 - p.price / p.mrp) * 100) : 0);
 
   /* ---------- Small templates ---------- */
   const ICON = {
@@ -51,8 +72,8 @@
         <span class="card__brand">${esc(p.brand === "Generic" ? p.cat : p.brand)}</span>
         <a class="card__name" href="#/p/${p.id}">${esc(p.name)}</a>
         <span class="pill pill--${st.cls}">${st.label}</span>
-        <div class="card__foot"><span class="card__price">${priceLabel(p)}</span>
-          <button class="card__add" data-add="${p.id}" aria-label="Add ${esc(p.name)} to enquiry list">${ICON.plus}</button></div>
+        <div class="card__foot"><span class="card__price${priced(p) ? " is-priced" : ""}">${priceLabel(p)}${offPct(p) ? ` <s>${rupees(p.mrp)}</s>` : ""}</span>
+          <button class="card__add" data-add="${p.id}" aria-label="Add ${esc(p.name)} to cart">${ICON.plus}</button></div>
       </div></article>`;
   }
   const crumbs = items => `<ol class="crumbs">${items.map(([t, h]) => `<li>${h ? `<a href="${h}">${esc(t)}</a>` : esc(t)}</li>`).join("")}</ol>`;
@@ -502,13 +523,14 @@
           <div class="pinfo__meta"><span class="pill pill--${st.cls}">${st.label}</span><span>${esc(p.cat)}</span></div>
           ${variants.length > 1 ? `<div class="variants"><h2>${variants.every(v => v.colour) ? "Colour" : "Options"}</h2><div class="variants__row">${variants.map(v => `<a class="variant" href="#/p/${v.id}" aria-current="${v.id === p.id}">${v.colour ? `<i style="background:${SWATCH[v.colour] || "#ccc"}"></i>` : ""}${esc(v.colour || v.name.replace(p.brand, "").trim())}</a>`).join("")}</div></div>` : ""}
           <div class="pinfo__price">
-            <div><strong>${priceLabel(p)}</strong><p>${S.showPrices && p.price ? "Inclusive of GST." : "Prices move with distributor rates, so we confirm the best price when you ask. It takes a few minutes on WhatsApp."}</p></div>
+            <div><strong>${priceLabel(p)}</strong>${offPct(p) ? ` <span class="pinfo__mrp">MRP <s>${rupees(p.mrp)}</s> <b>${offPct(p)}% off</b></span>` : ""}<p>${priced(p) ? "Inclusive of all taxes. GST invoice included." : "Prices move with distributor rates. Add it to your cart and we'll confirm the price before you pay, or ask us on WhatsApp."}</p></div>
             <div class="pinfo__actions">
               <div class="qty" aria-label="Quantity"><button data-q="-1" aria-label="Decrease quantity">−</button><output id="pq">1</output><button data-q="1" aria-label="Increase quantity">+</button></div>
-              <button class="btn btn--neel" id="padd">${ICON.plus} Add to enquiry list</button>
+              <button class="btn btn--neel" id="padd">${ICON.plus} Add to cart</button>
               <button class="iconbtn heart" style="position:static;background:#fff" data-wish="${p.id}" aria-pressed="${Store.isWished(p.id)}" aria-label="Save to wishlist">${ICON.heart}</button>
             </div>
-            <a class="btn btn--wa btn--block" href="${wa}" target="_blank" rel="noopener">${ICON.wa} Get today's price on WhatsApp</a>
+            ${ONLINE ? `<button class="btn btn--accent btn--block" id="pbuy">Buy now</button>` : ""}
+            <a class="btn ${priced(p) && ONLINE ? "btn--ghost" : "btn--wa"} btn--block" href="${wa}" target="_blank" rel="noopener">${ICON.wa} ${priced(p) ? "Ask a question on WhatsApp" : "Get today's price on WhatsApp"}</a>
           </div>
           <ul class="perks">
             <li>${ICON.check}<span><b>${p.stock > 0 ? "Collect today" : "We'll order it in"}</b> ${p.stock > 0 ? `from our ${esc(S.city)} store, or get it delivered.` : "and message you when it arrives."}</span></li>
@@ -528,6 +550,7 @@
     let q = 1;
     $$(".pinfo [data-q]").forEach(b => b.addEventListener("click", () => { q = Math.max(1, Math.min(99, q + +b.dataset.q)); $("#pq").textContent = q; Motion.bump($("#pq")); }));
     $("#padd").addEventListener("click", e => { Store.addToList(p.id, q); Motion.fly(e.currentTarget, imgs[0]); toast(`${q} × ${p.name} added`, true); });
+    const pb = $("#pbuy"); if (pb) pb.addEventListener("click", () => { if (!Store.get().list[p.id]) Store.addToList(p.id, q); location.hash = "#/checkout"; });
     const main = $("#gmain");
     $$("[data-thumb]").forEach(b => b.addEventListener("click", () => {
       $$("[data-thumb]").forEach(x => x.setAttribute("aria-current", x === b));
@@ -547,12 +570,12 @@
   /* ---------- Wishlist, help, 404 ---------- */
   function viewWishlist() {
     const list = Store.get().wish.map(id => P[id]).filter(Boolean);
-    app.innerHTML = `<section class="lhead"><div class="wrap">${crumbs([["Home", "#/"], ["Wishlist", null]])}<h1 data-split>Your wishlist</h1><p>${list.length ? `${list.length} saved ${list.length === 1 ? "product" : "products"}. Add them to your enquiry list when you're ready.` : "Tap the heart on any product to save it here."}</p></div></section>
-      <div class="wrap" style="padding-top:28px;padding-bottom:80px">${list.length ? `<div class="grid" id="grid">${list.map(p => card(p)).join("")}</div><div style="margin-top:24px"><button class="btn btn--neel" id="wishAll">${ICON.plus} Add all to enquiry list</button></div>` : `<div class="empty"><h2>Nothing saved yet.</h2><p>Start with a department.</p><a class="btn" href="#/c/guitars">Browse guitars</a></div>`}</div>`;
+    app.innerHTML = `<section class="lhead"><div class="wrap">${crumbs([["Home", "#/"], ["Wishlist", null]])}<h1 data-split>Your wishlist</h1><p>${list.length ? `${list.length} saved ${list.length === 1 ? "product" : "products"}. Add them to your cart when you're ready.` : "Tap the heart on any product to save it here."}</p></div></section>
+      <div class="wrap" style="padding-top:28px;padding-bottom:80px">${list.length ? `<div class="grid" id="grid">${list.map(p => card(p)).join("")}</div><div style="margin-top:24px"><button class="btn btn--neel" id="wishAll">${ICON.plus} Add all to cart</button></div>` : `<div class="empty"><h2>Nothing saved yet.</h2><p>Start with a department.</p><a class="btn" href="#/c/guitars">Browse guitars</a></div>`}</div>`;
     const b = $("#wishAll"); if (b) b.addEventListener("click", e => { list.forEach(p => Store.addToList(p.id)); Motion.fly(e.currentTarget, list[0].images[0]); toast(`${list.length} items added`, true); });
   }
   const HELP = {
-    enquiry: ["How enquiries work", `<ol><li>Add the products you want to your enquiry list. There's no payment online.</li><li>Open the list and send it to us on WhatsApp, or by email if you prefer.</li><li>We reply with today's best price, availability and delivery or pickup options, usually within the hour during store hours.</li><li>Pay at the store, by UPI or by bank transfer. You get a GST invoice either way.</li></ol>`],
+    enquiry: ["How ordering works", `<ol><li>Add products to your cart and check out with your name, phone and delivery address, or choose store pickup. There's no card payment online.</li><li>We confirm your order, usually within the hour during store hours. If an item shows “Price on request”, we confirm its price first.</li><li>Pay cash on delivery, by UPI once we confirm, or at the store when you collect. You get a GST invoice either way.</li><li>Follow your order any time on the <a href="#/track">Track your order</a> page.</li></ol><p>Prefer to talk first? Send your cart to us on WhatsApp from the cart.</p>`],
     delivery: ["Delivery and pickup", `<p>Anything marked <b>In stock</b> can be collected from our ${esc(S.city)} store the same day. We deliver across India through trusted couriers; guitars travel in a gig bag inside a double-walled carton.</p><p>Items marked <b>Available to order</b> usually reach us in 3 to 7 days. We'll message you when yours arrives.</p>`],
     returns: ["Returns and warranty", `<p>Every product carries the manufacturer's warranty. If something arrives damaged, message us within 48 hours with a photo of the box and product and we'll arrange a replacement.</p><p>Strings, picks and other consumables can't be returned once opened.</p>`],
     strings: ["Which strings fit my instrument?", `<p>Steel-string acoustic guitars take acoustic strings (bronze or phosphor bronze). Classical guitars only take nylon strings: steel strings can damage the neck. Electric guitars take nickel or stainless steel electric strings.</p><h2>Gauges in one line</h2><p>The first number is the thinnest string. Lighter sets (09 or 10) are easier to press and bend; heavier sets (11, 12 and up) are louder and fuller.</p><p><a class="btn" href="#/?finder=1">Use the string finder</a></p>`]
@@ -565,7 +588,7 @@
     app.innerHTML = `<div class="wrap" style="padding:80px 0"><div class="empty"><h2>We couldn't find that page.</h2><p>It may have moved, or the product is no longer listed.</p><a class="btn" href="#/">Back to the home page</a></div></div>`;
   }
 
-  /* ---------- Enquiry drawer ---------- */
+  /* ---------- Cart drawer ---------- */
   const drawer = $("#drawer"), scrim = $("#scrim");
   function openDrawer(on) {
     if (on) renderDrawer();
@@ -574,17 +597,28 @@
     scrim.onclick = () => openDrawer(false);
     if (on) { Motion.stop(); setTimeout(() => $("#drawerClose").focus(), 50); } else Motion.start();
   }
+  function cartLines() { const L = Store.get().list; return Object.keys(L).filter(id => P[id]).map(id => ({ p: P[id], qty: L[id] })); }
+  function cartTotals(fulfilment = "delivery") {
+    const lines = cartLines(), sub = lines.filter(l => priced(l.p)).reduce((a, l) => a + l.p.price * l.qty, 0);
+    const ck = S.checkout || {}, free = ck.freeShippingOver > 0 && sub >= ck.freeShippingOver;
+    const ship = fulfilment === "delivery" && !free ? ck.shippingFee || 0 : 0;
+    return { lines, sub, ship, total: sub + ship, unpriced: lines.some(l => !priced(l.p)) };
+  }
   function renderDrawer() {
-    const L = Store.get().list, ids = Object.keys(L).filter(id => P[id]);
-    if (!ids.length) {
-      $("#drawerBody").innerHTML = `<div class="drawer__empty"><svg viewBox="0 0 64 64" width="72" height="72" fill="none" stroke="#17153B" stroke-width="1.6">${window.ART.strings}</svg><p>Your list is empty. Add products, then send the list to us for today's prices.</p><a class="btn" href="#/c/all" data-close-drawer>Browse products</a></div>`;
+    const t = cartTotals();
+    if (!t.lines.length) {
+      $("#drawerBody").innerHTML = `<div class="drawer__empty"><svg viewBox="0 0 64 64" width="72" height="72" fill="none" stroke="#17153B" stroke-width="1.6">${window.ART.strings}</svg><p>Your cart is empty.</p><a class="btn" href="#/c/all" data-close-drawer>Browse products</a></div>`;
       $("#drawerFoot").innerHTML = ""; return;
     }
-    $("#drawerBody").innerHTML = ids.map(id => { const p = P[id]; return `<div class="line" data-line="${id}">
-      <a class="line__img" href="#/p/${id}" data-close-drawer>${hasImg(p) ? `<img src="${p.images[0]}" alt="">` : art(p, false)}</a>
-      <div><div class="line__brand">${esc(p.brand)}</div><a class="line__name" href="#/p/${id}" data-close-drawer>${esc(p.name)}</a><div><span class="pill pill--${stockInfo(p).cls}" style="font-size:12px">${stockInfo(p).label}</span></div><button class="line__rm" data-rm-line="${id}">Remove</button></div>
-      <div class="qty"><button data-dq="-1" aria-label="Decrease">−</button><output>${L[id]}</output><button data-dq="1" aria-label="Increase">+</button></div></div>`; }).join("");
-    $("#drawerFoot").innerHTML = `
+    $("#drawerBody").innerHTML = t.lines.map(({ p, qty }) => `<div class="line" data-line="${p.id}">
+      <a class="line__img" href="#/p/${p.id}" data-close-drawer>${hasImg(p) ? `<img src="${p.images[0]}" alt="">` : art(p, false)}</a>
+      <div><div class="line__brand">${esc(p.brand)}</div><a class="line__name" href="#/p/${p.id}" data-close-drawer>${esc(p.name)}</a><div class="line__price">${priced(p) ? rupees(p.price * qty) : "Price on request"}</div><button class="line__rm" data-rm-line="${p.id}">Remove</button></div>
+      <div class="qty"><button data-dq="-1" aria-label="Decrease">−</button><output>${qty}</output><button data-dq="1" aria-label="Increase">+</button></div></div>`).join("");
+    $("#drawerFoot").innerHTML = ONLINE ? `
+      <div class="cart-sub"><span>Subtotal</span><b>${rupees(t.sub)}${t.unpriced ? " +" : ""}</b></div>
+      ${t.unpriced ? '<p>Items marked “Price on request” are confirmed by us before you pay.</p>' : ""}
+      <a class="btn btn--accent btn--block" href="#/checkout" data-close-drawer>Check out</a>
+      <button class="btn btn--ghost btn--block" id="sendWa">${ICON.wa} Ask about this cart on WhatsApp</button>` : `
       <div class="field"><label for="eqName">Your name</label><input id="eqName" autocomplete="name"></div>
       <div class="field"><label for="eqNote">Anything we should know? (optional)</label><textarea id="eqNote" placeholder="Pickup or delivery, PIN code, budget…"></textarea></div>
       <button class="btn btn--wa btn--block" id="sendWa">${ICON.wa} Send list on WhatsApp</button>
@@ -592,9 +626,116 @@
       <p>We reply with prices and availability. Nothing is charged until you confirm.</p>`;
   }
   function enquiryText() {
-    const L = Store.get().list, name = ($("#eqName") || {}).value || "", note = ($("#eqNote") || {}).value || "";
-    const lines = Object.keys(L).filter(id => P[id]).map((id, i) => `${i + 1}. ${P[id].name} × ${L[id]}`);
+    const name = ($("#eqName") || {}).value || "", note = ($("#eqNote") || {}).value || "";
+    const lines = cartLines().map((l, i) => `${i + 1}. ${l.p.name} × ${l.qty}`);
     return `Hi Seven Notes${name ? ", this is " + name : ""}. Please share prices and availability for:\n${lines.join("\n")}${note ? "\n\nNote: " + note : ""}`;
+  }
+
+  /* ---------- Checkout, confirmation, tracking ---------- */
+  function viewCheckout() {
+    if (!ONLINE) { app.innerHTML = `<div class="wrap" style="padding:80px 0"><div class="empty"><h2>Online checkout is unavailable right now.</h2><p>Send your cart to us on WhatsApp and we'll take it from there.</p><button class="btn" data-open-list>Open cart</button></div></div>`; return; }
+    if (!cartLines().length) { app.innerHTML = `<div class="wrap" style="padding:80px 0"><div class="empty"><h2>Your cart is empty.</h2><p>Add something first, then come back here.</p><a class="btn" href="#/c/all">Browse products</a></div></div>`; return; }
+    const ck = S.checkout || {};
+    const opt = (name, value, title, text, checked) => `<label class="opt"><input type="radio" name="${name}" value="${value}"${checked ? " checked" : ""}><span><b>${title}</b><small>${text}</small></span></label>`;
+    app.innerHTML = `<section class="lhead"><div class="wrap">${crumbs([["Home", "#/"], ["Cart", "#/list"], ["Checkout", null]])}<h1 data-split>Checkout</h1></div></section>
+      <form class="wrap checkout" id="co" novalidate>
+        <div class="checkout__main">
+          <fieldset><legend>1. How do you want it?</legend><div class="opts" id="fulfil">
+            ${opt("fulfilment", "delivery", "Deliver to me", "Anywhere in India. We pack guitars in a gig bag inside a double-walled box.", true)}
+            ${ck.pickup ? opt("fulfilment", "pickup", `Pick up from our ${esc(S.city)} store`, "We'll message you when it's set up and ready.", false) : ""}</div></fieldset>
+          <fieldset><legend>2. Your details</legend><div class="cfields">
+            <div class="field"><label for="cName">Full name</label><input id="cName" name="name" autocomplete="name" required></div>
+            <div class="field"><label for="cPhone">Mobile number</label><input id="cPhone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" required placeholder="10-digit mobile"></div>
+            <div class="field cfields__wide"><label for="cEmail">Email (optional, for your invoice)</label><input id="cEmail" name="email" type="email" autocomplete="email"></div>
+            <div class="field cfields__wide" data-ship><label for="cAddr">Address</label><textarea id="cAddr" name="address" autocomplete="street-address" placeholder="House, street, area"></textarea></div>
+            <div class="field" data-ship><label for="cCity">City</label><input id="cCity" name="city" autocomplete="address-level2"></div>
+            <div class="field" data-ship><label for="cState">State</label><input id="cState" name="state" autocomplete="address-level1" value="Uttar Pradesh"></div>
+            <div class="field" data-ship><label for="cPin">PIN code</label><input id="cPin" name="pincode" inputmode="numeric" autocomplete="postal-code" maxlength="6"></div>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="sr-only" aria-hidden="true">
+          </div></fieldset>
+          <fieldset><legend>3. Payment</legend><div class="opts" id="payopts"></div></fieldset>
+          <div class="field"><label for="cNote">Note for the store (optional)</label><textarea id="cNote" name="notes" placeholder="e.g. Please string it with 10-47 gauge"></textarea></div>
+        </div>
+        <aside class="summary" id="summary"></aside>
+      </form>`;
+    const form = $("#co");
+    function payOpts() {
+      const f = form.fulfilment.value, cur = (form.querySelector("[name=paymentMethod]:checked") || {}).value;
+      const list = [f === "delivery" && ck.cod && ["cod", "Cash on delivery", "Pay the courier when it arrives."], ck.upi && ["upi", "UPI after we confirm", "We send our UPI ID once your order is confirmed."], f === "pickup" && ["store", "Pay at the store", "Cash, card or UPI when you collect."]].filter(Boolean);
+      $("#payopts").innerHTML = list.map(([v, t, d], i) => opt("paymentMethod", v, t, d, cur ? cur === v : i === 0)).join("");
+      if (!form.querySelector("[name=paymentMethod]:checked") && list.length) form.querySelector("[name=paymentMethod]").checked = true;
+      $$("[data-ship]", form).forEach(el => { el.hidden = f !== "delivery"; });
+      summary();
+    }
+    function summary() {
+      const t = cartTotals(form.fulfilment.value);
+      $("#summary").innerHTML = `<h2>Order summary</h2><ul>${t.lines.map(({ p, qty }) => `<li><span class="summary__img">${hasImg(p) ? `<img src="${p.images[0]}" alt="">` : art(p, false)}<i>${qty}</i></span><span>${esc(p.name)}</span><b>${priced(p) ? rupees(p.price * qty) : "On request"}</b></li>`).join("")}</ul>
+        <dl><dt>Items</dt><dd>${rupees(t.sub)}</dd><dt>${form.fulfilment.value === "pickup" ? "Store pickup" : "Delivery"}</dt><dd>${t.ship ? rupees(t.ship) : "Free"}</dd><dt class="summary__total">Total</dt><dd class="summary__total">${rupees(t.total)}${t.unpriced ? " +" : ""}</dd></dl>
+        ${t.unpriced ? '<p class="summary__note">Some items are “Price on request”. We confirm the final total before you pay.</p>' : ""}
+        <p class="summary__err" id="coErr" role="alert"></p>
+        <button class="btn btn--accent btn--block" id="place">Place order</button>
+        <p class="summary__note">No payment is taken now. We confirm every order by phone or WhatsApp.</p>`;
+    }
+    form.addEventListener("change", e => { if (e.target.name === "fulfilment") payOpts(); });
+    payOpts();
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const v = Object.fromEntries(new FormData(form)), btn = $("#place"), err = $("#coErr");
+      err.textContent = ""; btn.disabled = true; btn.textContent = "Placing your order…";
+      try {
+        const r = await fetch("/api/orders", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+          customer: { name: v.name, phone: v.phone, email: v.email, address: v.address, city: v.city, state: v.state, pincode: v.pincode },
+          fulfilment: v.fulfilment, paymentMethod: v.paymentMethod, notes: v.notes, website: v.website,
+          items: cartLines().map(l => ({ id: l.p.id, qty: l.qty })) }) });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error || "We couldn't place your order. Please try again.");
+        Store.clearList();
+        try { sessionStorage.setItem("sn:last", JSON.stringify(d)); } catch (x) {}
+        location.hash = `#/order/${encodeURIComponent(d.number)}?phone=${encodeURIComponent(String(v.phone).replace(/\D/g, "").slice(-10))}`;
+      } catch (x) { err.textContent = x.message; btn.disabled = false; btn.textContent = "Place order"; Motion.bump(err); }
+    });
+  }
+  const STEPS = [["pending", "Placed"], ["accepted", "Confirmed"], ["packed", "Packed"], ["shipped", "On the way"], ["delivered", "Delivered"]];
+  function progress(o) {
+    if (["cancelled", "rejected"].includes(o.status)) return `<p class="track__stop">This order was ${o.status}.${o.history.length ? " " + esc(o.history[o.history.length - 1].note) : ""}</p>`;
+    const steps = STEPS.map(s => (o.fulfilment === "pickup" && s[0] === "shipped" ? ["ready", "Ready for pickup"] : o.fulfilment === "pickup" && s[0] === "delivered" ? ["delivered", "Collected"] : s));
+    const at = steps.findIndex(s => s[0] === o.status);
+    return `<ol class="track">${steps.map((s, i) => `<li class="${i <= at ? "is-done" : ""}${i === at ? " is-now" : ""}"><i></i><span>${s[1]}</span></li>`).join("")}</ol>`;
+  }
+  function orderCard(o) {
+    return `${progress(o)}
+      ${o.tracking && o.tracking.carrier ? `<p class="track__ship">Shipped with <b>${esc(o.tracking.carrier)}</b>${o.tracking.number ? `, tracking number <b>${esc(o.tracking.number)}</b>` : ""}${o.tracking.url ? ` <a href="${esc(o.tracking.url)}" target="_blank" rel="noopener">Track with the courier</a>` : ""}</p>` : ""}
+      <ul class="track__items">${o.items.map(i => `<li>${i.image ? `<img src="${esc(i.image)}" alt="">` : ""}<span>${esc(i.name)} × ${i.qty}</span><b>${i.price === null ? "Price on request" : rupees(i.price * i.qty)}</b></li>`).join("")}</ul>
+      <p class="track__total">Total <b>${rupees(o.total)}${o.hasUnpriced ? " + items to be priced" : ""}</b></p>
+      <h3>Updates</h3><ul class="track__log">${o.history.slice().reverse().map(h => `<li><b>${esc(h.note)}</b><time>${new Date(h.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</time></li>`).join("")}</ul>`;
+  }
+  function viewOrderPlaced(number, qs) {
+    const phone = new URLSearchParams(qs).get("phone") || "";
+    let o = null; try { o = JSON.parse(sessionStorage.getItem("sn:last")); } catch (x) {}
+    if (!o || o.number !== number) { location.hash = `#/track?number=${encodeURIComponent(number)}&phone=${encodeURIComponent(phone)}`; return; }
+    app.innerHTML = `<section class="placed"><div class="wrap">
+      <div class="placed__bars" aria-hidden="true">${"<i></i>".repeat(7)}</div>
+      <h1 data-split>Thank you. Your order is in.</h1>
+      <p class="placed__num">Order number <b>${esc(o.number)}</b></p>
+      <p>We'll confirm it ${o.hasUnpriced ? "and the final price " : ""}on your phone shortly, usually within the hour during store hours.</p>
+      <div class="placed__actions"><a class="btn btn--accent" href="#/track?number=${encodeURIComponent(o.number)}&phone=${encodeURIComponent(phone)}">Track this order</a><a class="btn btn--ghost" href="#/">Keep shopping</a></div>
+      <div class="placed__card">${orderCard(o)}</div></div></section>`;
+    if (!Motion.reduce) gsap.from(".placed__bars i", { scaleY: 0, transformOrigin: "bottom", duration: 0.9, ease: "elastic.out(1, .45)", stagger: 0.06, delay: 0.5 });
+  }
+  async function viewTrack(qs) {
+    const u = new URLSearchParams(qs), number = u.get("number") || "", phone = u.get("phone") || "";
+    app.innerHTML = `<section class="lhead"><div class="wrap">${crumbs([["Home", "#/"], ["Track your order", null]])}<h1 data-split>Track your order</h1><p>Enter the order number from your confirmation and the mobile number you ordered with.</p></div></section>
+      <div class="wrap trackpage"><form class="trackform" id="tf"><div class="field"><label for="tNum">Order number</label><input id="tNum" name="number" value="${esc(number)}" placeholder="SN261102-0001" required></div><div class="field"><label for="tPh">Mobile number</label><input id="tPh" name="phone" value="${esc(phone)}" inputmode="numeric" required></div><button class="btn btn--accent">Find my order</button></form><div id="tres" role="status"></div></div>`;
+    $("#tf").addEventListener("submit", e => { e.preventDefault(); const f = new FormData(e.target); history.replaceState(null, "", `#/track?number=${encodeURIComponent(f.get("number").trim())}&phone=${encodeURIComponent(f.get("phone").trim())}`); lookup(f.get("number").trim(), f.get("phone").trim()); });
+    async function lookup(n, ph) {
+      const out = $("#tres"); out.innerHTML = "<p>Looking it up…</p>";
+      try {
+        const r = await fetch(`/api/orders/track?number=${encodeURIComponent(n)}&phone=${encodeURIComponent(ph)}`), d = await r.json();
+        if (!r.ok) throw new Error(d.error || "We couldn't find that order.");
+        out.innerHTML = `<div class="placed__card"><h2>Order ${esc(d.number)}</h2>${orderCard(d)}</div>`;
+      } catch (x) { out.innerHTML = `<p class="summary__err">${esc(x.message)}</p>`; }
+    }
+    if (number && phone) lookup(number, phone);
   }
   drawer.addEventListener("click", e => {
     const line = e.target.closest("[data-line]");
@@ -612,11 +753,12 @@
   /* ---------- Global delegated actions ---------- */
   function toast(msg, withLink) {
     const t = $("#toast");
-    t.innerHTML = `<span>${esc(msg)}</span>${withLink ? '<button data-open-list>View list</button>' : ""}`;
+    t.innerHTML = `<span>${esc(msg)}</span>${withLink ? '<button data-open-list>View cart</button>' : ""}`;
     Motion.toast(t);
   }
   $("#toast").addEventListener("click", e => { if (e.target.closest("[data-open-list]")) openDrawer(true); });
   document.addEventListener("click", e => {
+    if (e.target.closest("main [data-open-list]")) { openDrawer(true); return; }
     const add = e.target.closest("[data-add]");
     if (add) { e.preventDefault(); const p = P[add.dataset.add]; Store.addToList(p.id); Motion.fly(add, hasImg(p) && p.images[0]); toast(`${p.name} added`, true); return; }
     const w = e.target.closest("[data-wish]");
@@ -659,6 +801,9 @@
     else if (a === "p" && b) viewProduct(b);
     else if (a === "wishlist") viewWishlist();
     else if (a === "help") viewHelp(b);
+    else if (a === "checkout") viewCheckout();
+    else if (a === "order" && b) viewOrderPlaced(b, r.qs);
+    else if (a === "track") viewTrack(r.qs);
     else viewNotFound();
     Motion.page(app);
     if (extra && extra.hero) Motion.hero(extra.hero, extra.strings);
