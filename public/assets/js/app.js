@@ -807,7 +807,17 @@
     else viewNotFound();
     Motion.page(app);
     if (extra && extra.hero) Motion.hero(extra.hero, extra.strings);
+    trackView(r);
     return extra;
+  }
+  /* Vercel Web Analytics: report each hash route as a page, grouped by route pattern. */
+  const ROUTES = { c: "/c/[department]", brand: "/brand/[brand]", p: "/p/[product]", order: "/order/[number]", help: "/help/[topic]" };
+  function trackView(r) {
+    if (typeof window.va !== "function") return;
+    const [a] = r.seg, path = "/" + r.seg.map(encodeURIComponent).join("/");
+    const route = !a ? "/" : ROUTES[a] && r.seg.length > 1 ? ROUTES[a] : "/" + a;
+    // Order numbers and tracking details stay out of analytics.
+    window.va("pageview", { route, path: a === "order" || a === "track" ? route : path });
   }
   let heroStrings = null;
   function go() {
